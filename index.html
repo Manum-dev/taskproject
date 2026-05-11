@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Management Collaborativo - System Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="app-navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="brand-title">TaskSync Engine</span>
+          <span class="brand-badge">Go + NATS + K8s</span>
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-muted);">Collaborative System & Realtime Workload Engine</div>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <!-- WebSocket Status Indicator -->
+      <div class="ws-status-badge">
+        <div id="ws-dot" class="status-dot connected"></div>
+        <span id="ws-text">WSS: Connected (18ms)</span>
+        <button id="btn-toggle-ws" title="Simula sconnessione/riconnessione WebSocket" class="btn-icon-sm" style="margin-left: 0.25rem;">
+          ⚡
+        </button>
+      </div>
+
+      <!-- Active User Selector -->
+      <div class="user-selector">
+        <label for="select-user">Utente:</label>
+        <select id="select-user"></select>
+      </div>
+
+      <button id="btn-new-task" class="btn btn-primary">
+        <span>+ Nuovo Task</span>
+      </button>
+
+      <button id="btn-export-data" class="btn btn-secondary">
+        <span>Export Dati</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="app-tabs">
+    <button class="tab-btn active" data-tab="tab-kanban">
+      📋 Tabellone Kanban
+    </button>
+    <button class="tab-btn" data-tab="tab-workload">
+      ⚡ Carico Team & Auto-Assign
+    </button>
+    <button class="tab-btn" data-tab="tab-metrics">
+      📊 Monitoraggio & Test di Carico
+    </button>
+  </nav>
+
+  <main class="main-container">
+
+    <!-- Tab 1: Kanban Board -->
+    <section id="tab-kanban" class="tab-content active">
+      <div class="board-header">
+        <div>
+          <h2 class="board-title">Collaborative Sprint Board</h2>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+            Lock Ottimistico attivo (<code style="color: var(--primary);">version</code> incrementale ad ogni update HTTP/WSS).
+          </p>
+        </div>
+        <div class="board-actions">
+          <button id="btn-simulate-conflict" class="btn btn-accent">
+            ⚠️ Simula Conflitto HTTP 409
+          </button>
+        </div>
+      </div>
+
+      <div class="kanban-grid">
+        <!-- TODO -->
+        <div class="kanban-column" data-status="TODO">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-indicator indicator-todo"></span>
+              <span class="column-title">To Do</span>
+            </div>
+            <span class="column-count" id="count-todo">0</span>
+          </div>
+          <div class="task-list" id="list-todo"></div>
+        </div>
+
+        <!-- IN_PROGRESS -->
+        <div class="kanban-column" data-status="IN_PROGRESS">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-indicator indicator-inprogress"></span>
+              <span class="column-title">In Progress</span>
+            </div>
+            <span class="column-count" id="count-inprogress">0</span>
+          </div>
+          <div class="task-list" id="list-inprogress"></div>
+        </div>
+
+        <!-- IN_REVIEW -->
+        <div class="kanban-column" data-status="IN_REVIEW">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-indicator indicator-review"></span>
+              <span class="column-title">In Review</span>
+            </div>
+            <span class="column-count" id="count-review">0</span>
+          </div>
+          <div class="task-list" id="list-review"></div>
+        </div>
+
+        <!-- DONE -->
+        <div class="kanban-column" data-status="DONE">
+          <div class="column-header">
+            <div class="column-title-group">
+              <span class="column-indicator indicator-done"></span>
+              <span class="column-title">Done</span>
+            </div>
+            <span class="column-count" id="count-done">0</span>
+          </div>
+          <div class="task-list" id="list-done"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Workload Engine & Auto Assignment -->
+    <section id="tab-workload" class="tab-content">
+      <div class="workload-grid">
+        
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Carico Attivo del Team ($W_u$)</h2>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Calcolo dinamico pesato basato sugli Story Points e lo stato corrente.</p>
+            </div>
+            <button id="btn-auto-assign-new" class="btn btn-primary">
+              ⚡ Auto-Assegna Task con $W_u$ Minimo
+            </button>
+          </div>
+          <div class="member-list" id="workload-member-list"></div>
+        </div>
+
+        <div class="card-panel">
+          <h3 class="panel-title" style="margin-bottom: 0.8rem;">Algoritmo di Assegnazione</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            L'assegnazione automatica valuta ciascun membro del team libero, minimizzando il punteggio di carico accumulato:
+          </p>
+          
+          <div class="formula-box" style="text-align: center; padding: 1rem; background: var(--bg-card); border-radius: var(--radius-md);">
+            <strong>W<sub>u</sub> = &Sigma; (Points<sub>t</sub> &times; Weight<sub>t</sub>)</strong>
+            <br/><br/>
+            • In Progress = &times; 1.0<br/>
+            • In Review = &times; 0.5<br/>
+            • To Do = &times; 0.25<br/>
+            • Done = &times; 0.0
+          </div>
+
+          <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">Prossimo candidato automatico:</div>
+            <div id="optimal-candidate-display" style="font-size: 1.1rem; font-weight: 700; color: var(--accent-cyan);">
+              -
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Tab 3: Observability & Load Test Suite -->
+    <section id="tab-metrics" class="tab-content">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Uptime Produzione</span>
+          <span class="metric-value" style="color: var(--status-done);">99.85%</span>
+          <span class="metric-sub">Target SLA ≥ 99.5%</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Connessioni WebSocket Attive</span>
+          <span class="metric-value" id="metric-ws-conn">142</span>
+          <span class="metric-sub">Distribuite su Pod K8s</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Throughput API (Req/sec)</span>
+          <span class="metric-value" id="metric-rps" style="color: var(--accent-cyan);">485 rps</span>
+          <span class="metric-sub">Traefik Ingress Gateway</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Latenza P95 DB/API</span>
+          <span class="metric-value" id="metric-p95" style="color: var(--primary);">18.4 ms</span>
+          <span class="metric-sub">PostgreSQL + Redis Cache</span>
+        </div>
+      </div>
+
+      <div class="card-panel" style="margin-bottom: 1.5rem;">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">🚀 Suite di Test di Carico (Stress Test Runner)</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">Simulazione di 100 utenti concorrenti ed autoscaling dei pod HPA Kubernetes.</p>
+          </div>
+          <button id="btn-run-loadtest" class="btn btn-primary">
+            🚀 Avvia Test di Carico (100 Utenti)
+          </button>
+        </div>
+        <div id="loadtest-progress-container" style="display: none; margin-top: 1rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+            <span id="loadtest-status-text">Generazione traffico concorrente in corso...</span>
+            <span id="loadtest-percent-text">0%</span>
+          </div>
+          <div class="progress-bar-bg" style="height: 10px;">
+            <div id="loadtest-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Live NATS JetStream Event Stream</h3>
+          <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">Subject: tasks.events.></span>
+        </div>
+        <div class="terminal-box" id="nats-terminal"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal 1: Nuovo Task -->
+  <div class="modal-overlay" id="modal-task">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Crea Nuovo Task</h3>
+        <button class="close-btn" id="close-modal-task">&times;</button>
+      </div>
+      <form id="form-task">
+        <div class="form-group">
+          <label for="task-title">Titolo Task</label>
+          <input type="text" id="task-title" class="form-input" placeholder="Es. Implementare test di carico NATS" required />
+        </div>
+        <div class="form-group">
+          <label for="task-desc">Descrizione Dettagliata</label>
+          <textarea id="task-desc" class="form-textarea" rows="3" placeholder="Descrivi il comportamento ed i casi limite..."></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label for="task-points">Story Points (Stima)</label>
+            <select id="task-points" class="form-select">
+              <option value="1">1 Point</option>
+              <option value="2">2 Points</option>
+              <option value="3" selected>3 Points</option>
+              <option value="5">5 Points</option>
+              <option value="8">8 Points</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-priority">Priorità</label>
+            <select id="task-priority" class="form-select">
+              <option value="LOW">LOW</option>
+              <option value="MEDIUM" selected>MEDIUM</option>
+              <option value="HIGH">HIGH</option>
+              <option value="URGENT">URGENT</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="task-assignee">Assegnatario</label>
+          <select id="task-assignee" class="form-select">
+            <option value="AUTO">⚡ Auto-Assegna con Algoritmo Workload ($W_u$)</option>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-secondary" id="cancel-modal-task">Annulla</button>
+          <button type="submit" class="btn btn-primary">Crea Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: HTTP 409 Conflict Modal -->
+  <div class="modal-overlay" id="modal-conflict">
+    <div class="modal-container" style="border-color: var(--status-conflict);">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--status-conflict);">⚠️ HTTP 409 Conflict: Optimistic Lock Failure</h3>
+        <button class="close-btn" id="close-modal-conflict">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">
+        Un altro utente ha aggiornato questo task nel database mentre stavate effettuando le modifiche.
+      </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
+        <div style="background: hsla(0, 84%, 60%, 0.1); border: 1px solid var(--status-conflict); border-radius: var(--radius-md); padding: 0.85rem;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--status-conflict); margin-bottom: 0.4rem;">Tua Versione (Inviata: v<span id="conflict-client-ver">1</span>)</div>
+          <div id="conflict-client-text" style="font-size: 0.85rem; color: var(--text-primary);"></div>
+        </div>
+        <div style="background: hsla(217, 91%, 60%, 0.1); border: 1px solid var(--primary); border-radius: var(--radius-md); padding: 0.85rem;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); margin-bottom: 0.4rem;">Versione Server DB (Corrente: v<span id="conflict-server-ver">2</span>)</div>
+          <div id="conflict-server-text" style="font-size: 0.85rem; color: var(--text-primary);"></div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button class="btn btn-secondary" id="btn-merge-override">Applica e Sovrascrivi (Inc. Version)</button>
+        <button class="btn btn-primary" id="btn-accept-server">Ricarica Versione Server</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
