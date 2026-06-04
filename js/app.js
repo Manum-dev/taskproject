@@ -2,6 +2,7 @@ import { store, STATUSES } from './data.js';
 
 class App {
   constructor() {
+    this.draggedTaskId = null;
     this.init();
   }
 
