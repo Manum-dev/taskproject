@@ -149,3 +149,27 @@ CREATE INDEX idx_tasks_assignee_status ON tasks(assignee_id, status);
 
 ---
 
+## 5. Pratiche di Codice Sicuro & Hardening
+
+### 5.1 Prevenzione SQL Injection in Go (`pgx`)
+Interazione sicura con il DB tramite query parametrizzate per prevenire attacchi di iniezione di codice SQL:
+```go
+// Esempio query parametrizzata con controllo di versione (Lock Ottimistico)
+query := `
+    UPDATE tasks 
+    SET status = $1, version = version + 1, updated_at = NOW() 
+    WHERE id = $2 AND version = $3 
+    RETURNING version;
+`
+err := r.db.QueryRow(ctx, query, newStatus, taskID, clientVersion).Scan(&newVersion)
+```
+
+### 5.2 Autenticazione OAuth2 Sicura con PKCE
+Implementazione di PKCE (Proof Key for Code Exchange) per proteggere il flusso di autenticazione sui client pubblici ed evitare l'intercettazione degli authorization code.
+
+### 5.3 Hardening dell'API Gateway e Security Headers
+Tutte le risposte dell'API Gateway includono gli header di sicurezza raccomandati da OWASP:
+- **Content-Security-Policy (CSP)**: `default-src 'self';`
+- **X-Content-Type-Options**: `nosniff`
+- **X-Frame-Options**: `DENY`
+- **Strict-Transport-Security (HSTS)**: Abilitato per connessioni esclusivamente HTTPS.
