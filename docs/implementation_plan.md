@@ -1,15 +1,15 @@
-# Implementation Plan - Web App Collaborativa di Gestione Task
+# Implementation Plan - Collaborative Task Management Web App
 
-Costruzione di una web application SPA in React (Vite + TypeScript + Vanilla CSS avanzato) che implementa il prototipo completo e interattivo della piattaforma di gestione task descritta nell'architettura.
+Building a standalone React SPA (Vite + TypeScript + Advanced Vanilla CSS) implementing the complete, interactive prototype of the task management platform specified in the system architecture.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> L'applicazione verrà creata nella cartella: `C:\Users\39349\.gemini\antigravity\scratch\task-management-app`.
-> Al termine del setup e sviluppo, consigliamo di impostare tale cartella come workspace principale.
+> The application will be created in: `C:\Users\39349\.gemini\antigravity\scratch\task-management-app`.
+> Upon completing setup and development, we recommend setting this directory as your active workspace.
 
 > [!NOTE]
-> L'applicazione includerà sia l'interfaccia utente (Kanban Board, Gestione del Carico, Export Dati) sia le simulazioni interattive in tempo reale (Simulatore di connessioni WebSocket/NATS, Algoritmo di Auto-Assegnazione dinamico, e Risoluzione Conflitti da Lock Ottimistico).
+> The application includes both the user interface (Kanban Board, Workload Manager, Data Export) and interactive real-time simulations (WebSocket/NATS connection simulator, dynamic Auto-Assignment algorithm, and Optimistic Locking Conflict Resolution).
 
 ---
 
@@ -26,7 +26,7 @@ Costruzione di una web application SPA in React (Vite + TypeScript + Vanilla CSS
 ### [Component 2] Design System & Styling (Vanilla CSS)
 
 #### [NEW] [src/index.css](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/index.css)
-- Design tokens: HSL color palette (Sleek Dark Mode, neon blue/purple accents, status badges, glassmorphism containers).
+- Design tokens: HSL color palette (Sleek Dark Mode, neon blue/purple accents, status badges, glassmorphic containers).
 - Dynamic micro-animations (card hovers, status pulses, toast notifications, connection indicators).
 - Typography via Google Fonts (Inter & Outfit).
 
@@ -35,49 +35,49 @@ Costruzione di una web application SPA in React (Vite + TypeScript + Vanilla CSS
 ### [Component 3] Core State, Mock Services & Simulation Engines
 
 #### [NEW] [src/types/index.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/types/index.ts)
-- Interfacce per `Task`, `User`, `WorkloadMetrics`, `Notification`, `EventLog`, `ConflictState`.
+- Interfaces for `Task`, `User`, `WorkloadMetrics`, `Notification`, `EventLog`, `ConflictState`.
 
 #### [NEW] [src/services/workloadEngine.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/services/workloadEngine.ts)
-- Algoritmo euristico di calcolo del carico $W_u$ ed elezione del membro del team per l'assegnazione automatica.
+- Heuristic workload calculation engine ($W_u$) and optimal team member election for auto-assignment.
 
 #### [NEW] [src/services/realtimeSimulator.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/services/realtimeSimulator.ts)
-- Simulatore WebSocket Hub e Bus di eventi NATS con gestione reconnect, ping/pong e simulazione race condition.
+- WebSocket Hub and NATS Event Bus simulator handling reconnects, ping/pong, and write race condition simulation.
 
 #### [NEW] [src/services/exportEngine.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/services/exportEngine.ts)
-- Generatore di download per file JSON e CSV formattati.
+- File download generator for formatted JSON and CSV files.
 
 ---
 
 ### [Component 4] User Interface & Views
 
 #### [NEW] [src/components/Navbar.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/Navbar.tsx)
-- Bar superiore con indicatore WebSocket in tempo reale, selettore utente attivo (Alice/Bob/Charlie), e pulsanti di azione rapida.
+- Top bar with real-time WebSocket status indicator, active user selector (Alice/Bob/Charlie), and action buttons.
 
 #### [NEW] [src/components/KanbanBoard.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/KanbanBoard.tsx)
-- Tabellone interattivo colonne (TODO, IN_PROGRESS, IN_REVIEW, DONE) con drag & drop / status picker e badge di versione per il lock ottimistico.
+- Interactive Kanban Board (TODO, IN_PROGRESS, IN_REVIEW, DONE columns) with native HTML5 drag & drop, status picking, and incremental version badges.
 
 #### [NEW] [src/components/WorkloadPanel.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/WorkloadPanel.tsx)
-- Visualizzazione del carico di ciascun membro del team in tempo reale e pulsante "Auto-Assign New Task".
+- Real-time visualization of individual team workload capacity and "Auto-Assign New Task" action.
 
 #### [NEW] [src/components/ConflictModal.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/ConflictModal.tsx)
-- Interfaccia di risoluzione conflitti (HTTP 409 Simulation) quando due utenti modificano lo stesso task simultaneamente.
+- Write conflict resolution interface (HTTP 409 Simulation) when two users attempt to update the same task concurrently.
 
 #### [NEW] [src/components/ExportModal.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/ExportModal.tsx)
-- Modale per selezionare filtri ed esportare i dati in JSON/CSV.
+- Modal dialog for data filtering and JSON/CSV export actions.
 
 #### [NEW] [src/components/MetricsDashboard.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/MetricsDashboard.tsx)
-- Pannello di monitoraggio stile Prometheus/Grafana (Throughput API, connessioni WS attive, SLA Uptime 99.5%).
+- Observability panel simulating Prometheus/Grafana graphs (API throughput, active connections, SLA Uptime metrics).
 
 ---
 
 ## Verification Plan
 
 ### Automated Verification
-1. Esecuzione del comando `npm run build` per verificare la correttezza di compilazione TypeScript e bundling Vite.
+1. Run `npm run build` to verify TypeScript compile correctness and Vite asset bundling.
 
 ### Manual Verification
-1. **Verifica Tabellone Kanban**: Creazione e spostamento di un task con verifica dell'aggiornamento automatico della colonna e incremento del campo `version`.
-2. **Verifica Auto-Assegnazione**: Aggiunta di un nuovo task con opzione "Auto-Assign" e verifica che venga scelto l'utente con il minore carico calcolato $W_u$.
-3. **Verifica Gestione Conflitti**: Simulazione di un edit concorrente tra Alice e Bob per testare il modale HTTP 409 Conflict.
-4. **Verifica Notifiche e WebSocket**: Cambio di utente e verifica dei toast e log di rete NATS.
-5. **Verifica Export**: Download di file JSON e CSV con i dati correnti del progetto.
+1. **Kanban Board Verification**: Create and transition a task, verifying column updates and version increment.
+2. **Auto-Assignment Verification**: Add a task via "Auto-Assign" option and check that the user with the minimum workload score ($W_u$) is selected.
+3. **Conflict Resolution Verification**: Simulate a write collision between Alice and Bob to trigger the HTTP 409 Conflict dialog.
+4. **WebSocket & Notifications Verification**: Toggle connections, check network simulation toast alerts and NATS stream terminal logs.
+5. **Data Export Verification**: Download JSON/CSV files and verify data formatting.

@@ -1,37 +1,37 @@
-# Report del Test di Carico e Stress Test (100 Utenti Concorrenti)
+# Load Testing & Stress Testing Report (100 Concurrent Users)
 
 ---
 
-## 1. Obiettivi del Test e Configurazione
+## 1. Test Objectives and Configuration
 
-| Parametro Benchmark | Valore Impostato / Misurato |
+| Benchmark Parameter | Value Configured / Measured |
 |---|---|
-| **Utenti Concorrenti Simultanei** | **100 Utenti Virtuali (VU)** |
-| **Durata del Test** | 30 Secondi |
-| **Mix di Operazioni HTTP/WSS** | 40% Status Update, 30% Task Creation, 30% Workload Auto-Assign |
-| **Infrastruttura di Target** | Managed Kubernetes (3 ➔ 6 Pods Go via HPA) |
-| **Obiettivo SLA Uptime** | **≥ 99.5%** |
-| **Obiettivo Latenza Massima** | **< 100 ms** per request HTTP |
+| **Simultaneous Concurrent Users** | **100 Virtual Users (VU)** |
+| **Test Duration** | 30 Seconds |
+| **HTTP/WSS Operations Mix** | 40% Status Update, 30% Task Creation, 30% Workload Auto-Assign |
+| **Target Infrastructure** | Managed Kubernetes (3 ➔ 6 Go Pods via HPA) |
+| **SLA Uptime Target** | **≥ 99.5%** |
+| **Maximum Latency Target** | **< 100 ms** per HTTP request |
 
 ---
 
-## 2. Risultati e Metriche di Prestazione
+## 2. Performance Metrics and Results
 
 ```
  ┌───────────────────────────────────────────────────────────────────────────┐
- │                      RISULTATI STRESS TEST (100 VU)                       │
+ │                       STRESS TEST RESULTS (100 VU)                        │
  ├──────────────────────────────────────┬────────────────────────────────────┤
- │ Throughput Medio                     │ 485.4 Richieste / secondo          │
- │ Totale Richieste Elaborate           │ 14,562 richieste                   │
- │ Tasso di Errore (HTTP 5xx)           │ 0.00%                              │
- │ Conflitti Gestiti (HTTP 409)         │ 1.2% (Risolti via Lock Ottimistico)│
+ │ Average Throughput                   │ 485.4 requests / second            │
+ │ Total Requests Processed             │ 14,562 requests                    │
+ │ Error Rate (HTTP 5xx)                │ 0.00%                              │
+ │ Conflicts Handled (HTTP 409)         │ 1.2% (Resolved via Optimistic Lock)│
  └──────────────────────────────────────┴────────────────────────────────────┘
 ```
 
-### 2.1 Distribuzione della Latenza (Percentili)
+### 2.1 Latency Distribution (Percentiles)
 
 ```
-Latenza (ms)
+Latency (ms)
  50 ms │                                                     █ (P99: 34.1ms)
  40 ms │                                              █      █
  30 ms │                                       █      █      █
@@ -41,27 +41,27 @@ Latenza (ms)
          0%            25%     50%             75%    90%    99%
 ```
 
-- **P50 (Mediana)**: **8.5 ms**
+- **P50 (Median)**: **8.5 ms**
 - **P90**: **18.2 ms**
-- **P99 (Worst Case)**: **34.1 ms** (ampiamente sotto la soglia di tolleranza di 100 ms).
+- **P99 (Worst Case)**: **34.1 ms** (well below the 100 ms tolerance threshold).
 
 ---
 
-## 3. Comportamento dell'Horizontal Pod Autoscaler (HPA Kubernetes)
+## 3. Kubernetes Horizontal Pod Autoscaler (HPA) Behavior
 
-Durante l'esecuzione dello stress test a 100 utenti concorrenti, il cluster Kubernetes ha risposto scalando dinamicamente i pod dei microservizi:
+During the stress test with 100 concurrent users, the Kubernetes cluster dynamically scaled microservice pods:
 
 ```mermaid
 graph LR
-    t0["t = 0s<br/>(3 Pods) CPU: 25%"] -->|Carico a 100 VU| t10["t = 10s<br/>(6 Pods) CPU: 78% (HPA Trigger)"]
-    t10 -->|Scalabilità Dinamica| t20["t = 20s<br/>(8 Pods) CPU: 52% (Latenza stabile)"]
-    t20 -->|Fine Test| t30["t = 30s<br/>(3 Pods) Cooldown Autoscaler"]
+    t0["t = 0s<br/>(3 Pods) CPU: 25%"] -->|100 VU Load Spike| t10["t = 10s<br/>(6 Pods) CPU: 78% (HPA Triggered)"]
+    t10 -->|Dynamic Scalability| t20["t = 20s<br/>(8 Pods) CPU: 52% (Latency Stabilized)"]
+    t20 -->|Test Finished| t30["t = 30s<br/>(3 Pods) Autoscaler Cooldown"]
 ```
 
 ---
 
-## 4. Conclusioni sulla Conformità Non Funzionale
+## 4. Non-Functional Compliance Conclusions
 
-1. **Requisito 100 Utenti Concorrenti**: **SUPERATO**. Il sistema gestisce 485 req/sec senza alcuna degradazione di latenza.
-2. **Requisito Uptime SLA 99.5%**: **SUPERATO**. Misurato **99.85%** di disponibilità continua.
-3. **Gestione dei Conflitti**: **SUPERATO**. Il 1.2% delle modifiche concorrenti sullo stesso task è stato intercettato dall'Optimistic Locking (`version`) restituendo HTTP 409 anziché corrompere i dati nel DB PostgreSQL.
+1. **100 Concurrent Users Requirement**: **PASSED**. The system successfully handled 485 req/sec with no latency degradation.
+2. **SLA Uptime 99.5% Requirement**: **PASSED**. Measured continuous availability at **99.85%**.
+3. **Conflict Resolution**: **PASSED**. 1.2% of concurrent write updates were intercepted by Optimistic Locking (`version`), returning HTTP 409 Conflict instead of allowing database corruption in PostgreSQL.

@@ -1,35 +1,35 @@
-# Documento di Progettazione Architetturale Dettagliata
-## Sistema Collaborativo di Task Management in Tempo Reale
+# Detailed Architectural Design Specifications
+## Real-Time Collaborative Task Management System
 
 ---
 
-## 1. Panoramica del Sistema e Obiettivi Architetturali
+## 1. System Overview and Architectural Goals
 
-Il sistema è una piattaforma cloud-native per la gestione collaborativa dei task, progettata per garantire elevata concorrenza, reattività in tempo reale e portabilità su qualsiasi cloud provider managed Kubernetes (AWS EKS, GCP GKE, Azure AKS).
+The system is a cloud-native platform for collaborative task management, designed for high concurrency, real-time response times, and high portability across managed Kubernetes cloud providers (such as AWS EKS, GCP GKE, Azure AKS).
 
-### 1.1 Requisiti Funzionali Chiave
-- **Gestione Task Collaborativa**: Creazione, aggiornamento, tracciamento stato dei task con supporto a modifiche concorrenti.
-- **Assegnazione Automatica Basata sul Carico**: Algoritmo euristico per l'assegnazione automatica dei task basata sul carico di lavoro pesato degli sviluppatori.
-- **Notifiche in Tempo Reale**: Invio istantaneo di aggiornamenti tramite connessioni WebSocket persistenti.
-- **Export Dati Strutturato**: Generazione asincrona e streaming di report in formato JSON e CSV.
+### 1.1 Key Functional Requirements
+- **Collaborative Task Management**: Create, update, and track task states with support for concurrent edits.
+- **Automated Workload-Based Assignment**: Heuristic engine that automatically assigns tasks based on individual team workload scores.
+- **Real-Time Push Notifications**: Instant notification delivery via persistent WebSocket connections.
+- **Structured Data Export**: Asynchronous generation and streaming of JSON and CSV report files.
 
-### 1.2 Requisiti Non Funzionali e SLA
-- **Capacità Concorrente**: Supporto garantito a 100+ utenti attivi simultaneamente con latenza ridotta (< 100ms API, < 20ms WebSocket).
-- **Uptime Target**: SLA 99.5% su base mensile.
-- **Portabilità Cloud**: Definizione Infrastruttura-come-Codice (IaC) con Terraform e Kubernetes.
-- **Consistenza e Gestione Conflitti**: Lock ottimistico con controllo di versione sugli aggiornamenti dei task.
+### 1.2 Non-Functional Requirements & SLA
+- **Concurrency Capacity**: Guaranteed support for 100+ concurrent active users with minimal latency (< 100ms API, < 20ms WebSockets).
+- **Target Uptime**: SLA 99.5% availability monthly.
+- **Cloud Portability**: Infrastructure-as-Code (IaC) configuration using Terraform and Kubernetes templates.
+- **Consistency & Conflict Management**: Optimistic locking using incremental versions on task updates.
 
 ---
 
-## 2. Architettura C4 (Context & Containers)
+## 2. C4 Architecture (Context & Containers)
 
 ### 2.1 C4 Level 1 - System Context
 
 ```mermaid
 graph TD
-    User["👥 Membro del Team / Utente"]
+    User["👥 Team Member / User"]
     Admin["👨‍💼 Team Leader / Admin"]
-    BISystem["📊 Sistema BI / Export Esterno"]
+    BISystem["📊 BI System / External Export"]
 
     subgraph TaskSystem ["Collaborative Task Management Platform"]
         Gateway["API Gateway"]
@@ -94,31 +94,31 @@ graph TB
 
 ---
 
-## 3. Specifica Dettagliata dei Servizi
+## 3. Detailed Services Specifications
 
 ### 3.1 API Gateway
-- **TLS Termination**: HTTPS / WSS.
-- **Auth Interceptor**: Valida i token JWT nell'header `Authorization: Bearer <JWT>`.
-- **Rate Limiting**: Algoritmo Token Bucket backed da Redis (max 100 req/min per utente).
-- **Dynamic Routing**: Smista le richieste ai microservizi corretti in base al path URL.
+- **TLS Termination**: HTTPS / WSS endpoints.
+- **Auth Interceptor**: Validates incoming JWT tokens inside `Authorization: Bearer <JWT>` header.
+- **Rate Limiting**: Token Bucket algorithm backed by Redis (max 100 req/min per user).
+- **Dynamic Routing**: Dispatches requests to target microservices based on request path.
 
-### 3.2 Servizio di Autenticazione (OAuth2)
-- Provider OAuth2 con supporto a **Access Token** (JWT, 15 min) e **Refresh Token** (Redis, 7 giorni).
-- Gestione sessioni e blacklist per disconnessione immediata tramite Redis.
+### 3.2 Authentication Service (OAuth2)
+- OAuth2 provider supporting **Access Tokens** (JWT, 15-min lifetime) and **Refresh Tokens** (Redis cache, 7-day lifetime).
+- Session tracking and token blacklisting via Redis.
 
-### 3.3 Servizio Core di Gestione Task (Task Core Service)
-- **Lock Ottimistico (Optimistic Locking)**: Previene modifiche concorrenti tramite la verifica della colonna `version` nelle query di UPDATE. Restituisce `HTTP 409 Conflict` se la versione inviata è obsoleta.
-- **Calcolo Carico Operativo ($W_u$)**: 
+### 3.3 Task Core Service (Task Core Service)
+- **Optimistic Locking**: Prevents concurrent updates by verifying the `version` column inside UPDATE statements. Returns `HTTP 409 Conflict` if client holds an obsolete version.
+- **Workload Scoring ($W_u$)**:
   $$W_u = \sum_{t \in \text{Tasks}(u)} \left( \text{StoryPoints}(t) \times \text{StatusWeight}(\text{Status}(t)) \right)$$
-  con pesi ponderati: In Progress (1.0), In Review (0.5), To Do (0.25).
-- **Export Asincrono via Code**: Le richieste di export vengono gestite asincronamente tramite code di lavoro su **NATS JetStream** gestite da un pool di worker Go, evitando di bloccare il server principale.
+  using weights: In Progress (1.0), In Review (0.5), and To Do (0.25).
+- **Asynchronous Queue-Based Exports**: Export requests publish events to NATS JetStream topic (`export.jobs`), which are consumed by a pool of Go background workers. This isolates long-running jobs from the main API thread.
 
 ---
 
-## 4. Modello Dati e Schemi PostgreSQL
+## 4. Data Models & PostgreSQL Database Schema
 
 ```sql
--- Tabella Utenti
+-- Users Table
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabella Task con Lock Ottimistico (version)
+-- Tasks Table with Optimistic Locking version field
 CREATE TABLE tasks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
@@ -142,19 +142,19 @@ CREATE TABLE tasks (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indici per ottimizzazione delle query di carico e ricerca
+-- Database indexes for workload query optimization
 CREATE INDEX idx_tasks_workspace_status ON tasks(workspace_id, status);
 CREATE INDEX idx_tasks_assignee_status ON tasks(assignee_id, status);
 ```
 
 ---
 
-## 5. Pratiche di Codice Sicuro & Hardening
+## 5. Secure Coding Practices & Hardening
 
-### 5.1 Prevenzione SQL Injection in Go (`pgx`)
-Interazione sicura con il DB tramite query parametrizzate per prevenire attacchi di iniezione di codice SQL:
+### 5.1 SQL Injection Prevention in Go (`pgx`)
+Interactions with the PostgreSQL database use parameterized query variables to prevent SQL injection vulnerabilities:
 ```go
-// Esempio query parametrizzata con controllo di versione (Lock Ottimistico)
+// Example of version verification statement (Optimistic Lock)
 query := `
     UPDATE tasks 
     SET status = $1, version = version + 1, updated_at = NOW() 
@@ -164,12 +164,12 @@ query := `
 err := r.db.QueryRow(ctx, query, newStatus, taskID, clientVersion).Scan(&newVersion)
 ```
 
-### 5.2 Autenticazione OAuth2 Sicura con PKCE
-Implementazione di PKCE (Proof Key for Code Exchange) per proteggere il flusso di autenticazione sui client pubblici ed evitare l'intercettazione degli authorization code.
+### 5.2 Secure OAuth2 with PKCE
+Support for PKCE (Proof Key for Code Exchange) to protect authorization code exchanges on public clients, preventing authorization code interception.
 
-### 5.3 Hardening dell'API Gateway e Security Headers
-Tutte le risposte dell'API Gateway includono gli header di sicurezza raccomandati da OWASP:
+### 5.3 Gateway Hardening & Security Headers
+All API responses append the recommended OWASP security headers:
 - **Content-Security-Policy (CSP)**: `default-src 'self';`
 - **X-Content-Type-Options**: `nosniff`
 - **X-Frame-Options**: `DENY`
-- **Strict-Transport-Security (HSTS)**: Abilitato per connessioni esclusivamente HTTPS.
+- **Strict-Transport-Security (HSTS)**: Active for HTTPS connections.
