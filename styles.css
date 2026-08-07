@@ -1,19 +1,14 @@
 /* ==========================================================
-   Design System - Collaborative Task Management
-   Simple, clean, and responsive Dark Mode styles
+   Design System - Collaborative Task Management (Clean CSS)
    ========================================================== */
 
 :root {
-  /* HSL Colors */
   --bg-dark: #0f172a;
   --bg-card: #1e293b;
-  --bg-card-hover: #334155;
   --border-subtle: #475569;
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #64748b;
-
-  /* Accent & Status Colors */
   --primary: #3b82f6;
   --accent-purple: #a855f7;
   --accent-cyan: #06b6d4;
@@ -22,7 +17,6 @@
   --status-review: #c084fc;
   --status-done: #22c55e;
   --status-conflict: #ef4444;
-
   --radius-md: 10px;
   --radius-full: 9999px;
   --font-sans: 'Inter', system-ui, sans-serif;
@@ -96,7 +90,7 @@ body {
   gap: 1rem;
 }
 
-/* WebSocket Status & Selector */
+/* WebSocket & Selectors */
 .ws-status-badge {
   display: flex;
   align-items: center;
@@ -136,38 +130,7 @@ body {
   cursor: pointer;
 }
 
-/* Action Buttons */
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.2s;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: #ffffff;
-}
-
-.btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
-}
-
-.btn-accent {
-  background: var(--accent-purple);
-  color: #ffffff;
-}
-
-/* Tabs Navigation */
+/* Navigation Tabs */
 .app-tabs {
   display: flex;
   padding: 0.5rem 2rem 0;
@@ -191,7 +154,21 @@ body {
   font-weight: 600;
 }
 
-/* Main Content Workspace */
+/* Buttons */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary { background: var(--primary); color: #ffffff; }
+.btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-subtle); }
+.btn-accent { background: var(--accent-purple); color: #ffffff; }
+
+/* Main layout workspace */
 .main-container {
   flex: 1;
   padding: 1.5rem 2rem;
@@ -200,13 +177,8 @@ body {
   width: 100%;
 }
 
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
-}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
 /* Kanban Board Columns */
 .board-header {
@@ -228,15 +200,11 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .kanban-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .kanban-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 600px) {
-  .kanban-grid {
-    grid-template-columns: 1fr;
-  }
+  .kanban-grid { grid-template-columns: 1fr; }
 }
 
 .kanban-column {
@@ -295,19 +263,17 @@ body {
   flex: 1;
 }
 
-/* Task Card styles */
+/* Task Cards */
 .task-card {
   background: #0f172a;
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 0.85rem;
   cursor: grab;
-  position: relative;
 }
 
 .task-card:hover {
   border-color: var(--primary);
-  background: var(--bg-card-hover);
 }
 
 .task-card-header {
@@ -337,7 +303,6 @@ body {
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
-  color: var(--text-primary);
 }
 
 .task-desc {
@@ -366,10 +331,9 @@ body {
   background: rgba(255, 255, 255, 0.05);
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
-  color: var(--text-secondary);
 }
 
-/* Card Panel & Workload layouts */
+/* Card Panel & Workload Panel */
 .workload-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -377,9 +341,7 @@ body {
 }
 
 @media (max-width: 900px) {
-  .workload-grid {
-    grid-template-columns: 1fr;
-  }
+  .workload-grid { grid-template-columns: 1fr; }
 }
 
 .card-panel {
@@ -394,7 +356,6 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  gap: 1rem;
 }
 
 .panel-title {
@@ -448,10 +409,9 @@ body {
   margin-top: 1rem;
   font-family: monospace;
   font-size: 0.85rem;
-  line-height: 1.5;
 }
 
-/* Observability Metrics */
+/* Observability Metrics & Load Test */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -460,9 +420,7 @@ body {
 }
 
 @media (max-width: 800px) {
-  .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .metric-card {
@@ -475,36 +433,23 @@ body {
   gap: 0.3rem;
 }
 
-.metric-label {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.metric-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.metric-sub {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
+.metric-label { font-size: 0.75rem; color: var(--text-secondary); }
+.metric-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+.metric-sub { font-size: 0.7rem; color: var(--text-muted); }
 
 .terminal-box {
   background: #090d16;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1rem;
-  font-family: var(--font-mono, monospace);
+  font-family: monospace;
   font-size: 0.75rem;
   color: #10b981;
   height: 200px;
   overflow-y: auto;
-  line-height: 1.4;
 }
 
-/* Modals overlays */
+/* Modals overlays & Inputs */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -519,12 +464,10 @@ body {
   padding: 1rem;
 }
 
-.modal-overlay.active {
-  display: flex;
-}
+.modal-overlay.active { display: flex; }
 
 .modal-container {
-  background: var(--bg-modal, #1e293b);
+  background: #1e293b;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 1.5rem;
@@ -539,30 +482,11 @@ body {
   margin-bottom: 1.25rem;
 }
 
-.modal-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-}
+.modal-title { font-size: 1.15rem; font-weight: 700; }
+.close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
 
-.close-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-/* Form controls */
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.8rem;
-  margin-bottom: 0.35rem;
-  color: var(--text-secondary);
-}
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.8rem; margin-bottom: 0.35rem; color: var(--text-secondary); }
 
 .form-input, .form-textarea, .form-select {
   width: 100%;
