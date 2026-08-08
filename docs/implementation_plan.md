@@ -9,7 +9,7 @@ Building a standalone React SPA (Vite + TypeScript + Advanced Vanilla CSS) imple
 > Upon completing setup and development, we recommend setting this directory as your active workspace.
 
 > [!NOTE]
-> The application includes both the user interface (Kanban Board, Workload Manager, Data Export) and interactive real-time simulations (WebSocket/NATS connection simulator, dynamic Auto-Assignment algorithm, and Optimistic Locking Conflict Resolution).
+> The application includes both the user interface (Kanban Board, Data Export) and interactive real-time simulations (WebSocket/NATS connection simulator, and Optimistic Locking Conflict Resolution).
 
 ---
 
@@ -35,10 +35,7 @@ Building a standalone React SPA (Vite + TypeScript + Advanced Vanilla CSS) imple
 ### [Component 3] Core State, Mock Services & Simulation Engines
 
 #### [NEW] [src/types/index.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/types/index.ts)
-- Interfaces for `Task`, `User`, `WorkloadMetrics`, `Notification`, `EventLog`, `ConflictState`.
-
-#### [NEW] [src/services/workloadEngine.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/services/workloadEngine.ts)
-- Heuristic workload calculation engine ($W_u$) and optimal team member election for auto-assignment.
+- Interfaces for `Task`, `User`, `Notification`, `EventLog`, `ConflictState`.
 
 #### [NEW] [src/services/realtimeSimulator.ts](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/services/realtimeSimulator.ts)
 - WebSocket Hub and NATS Event Bus simulator handling reconnects, ping/pong, and write race condition simulation.
@@ -56,8 +53,7 @@ Building a standalone React SPA (Vite + TypeScript + Advanced Vanilla CSS) imple
 #### [NEW] [src/components/KanbanBoard.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/KanbanBoard.tsx)
 - Interactive Kanban Board (TODO, IN_PROGRESS, IN_REVIEW, DONE columns) with native HTML5 drag & drop, status picking, and incremental version badges.
 
-#### [NEW] [src/components/WorkloadPanel.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/WorkloadPanel.tsx)
-- Real-time visualization of individual team workload capacity and "Auto-Assign New Task" action.
+
 
 #### [NEW] [src/components/ConflictModal.tsx](file:///C:/Users/39349/.gemini/antigravity/scratch/task-management-app/src/components/ConflictModal.tsx)
 - Write conflict resolution interface (HTTP 409 Simulation) when two users attempt to update the same task concurrently.
@@ -77,7 +73,6 @@ Building a standalone React SPA (Vite + TypeScript + Advanced Vanilla CSS) imple
 
 ### Manual Verification
 1. **Kanban Board Verification**: Create and transition a task, verifying column updates and version increment.
-2. **Auto-Assignment Verification**: Add a task via "Auto-Assign" option and check that the user with the minimum workload score ($W_u$) is selected.
-3. **Conflict Resolution Verification**: Simulate a write collision between Alice and Bob to trigger the HTTP 409 Conflict dialog.
+2. **Conflict Resolution Verification**: Simulate a write collision between Alice and Bob to trigger the HTTP 409 Conflict dialog.
 4. **WebSocket & Notifications Verification**: Toggle connections, check network simulation toast alerts and NATS stream terminal logs.
 5. **Data Export Verification**: Download JSON/CSV files and verify data formatting.

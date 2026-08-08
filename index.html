@@ -55,9 +55,6 @@
     <button class="tab-btn active" data-tab="tab-kanban">
       📋 Tabellone Kanban
     </button>
-    <button class="tab-btn" data-tab="tab-workload">
-      ⚡ Carico Team & Auto-Assign
-    </button>
     <button class="tab-btn" data-tab="tab-metrics">
       📊 Monitoraggio & Test di Carico
     </button>
@@ -132,48 +129,7 @@
       </div>
     </section>
 
-    <!-- Tab 2: Workload Engine & Auto Assignment -->
-    <section id="tab-workload" class="tab-content">
-      <div class="workload-grid">
-        
-        <div class="card-panel">
-          <div class="panel-header">
-            <div>
-              <h2 class="panel-title">Carico Attivo del Team ($W_u$)</h2>
-              <p style="font-size: 0.8rem; color: var(--text-secondary);">Calcolo dinamico pesato basato sugli Story Points e lo stato corrente.</p>
-            </div>
-            <button id="btn-auto-assign-new" class="btn btn-primary">
-              ⚡ Auto-Assegna Task con $W_u$ Minimo
-            </button>
-          </div>
-          <div class="member-list" id="workload-member-list"></div>
-        </div>
 
-        <div class="card-panel">
-          <h3 class="panel-title" style="margin-bottom: 0.8rem;">Algoritmo di Assegnazione</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
-            L'assegnazione automatica valuta ciascun membro del team libero, minimizzando il punteggio di carico accumulato:
-          </p>
-          
-          <div class="formula-box" style="text-align: center; padding: 1rem; background: var(--bg-card); border-radius: var(--radius-md);">
-            <strong>W<sub>u</sub> = &Sigma; (Points<sub>t</sub> &times; Weight<sub>t</sub>)</strong>
-            <br/><br/>
-            • In Progress = &times; 1.0<br/>
-            • In Review = &times; 0.5<br/>
-            • To Do = &times; 0.25<br/>
-            • Done = &times; 0.0
-          </div>
-
-          <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
-            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">Prossimo candidato automatico:</div>
-            <div id="optimal-candidate-display" style="font-size: 1.1rem; font-weight: 700; color: var(--accent-cyan);">
-              -
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
 
     <!-- Tab 3: Observability & Load Test Suite -->
     <section id="tab-metrics" class="tab-content">
@@ -271,9 +227,7 @@
         </div>
         <div class="form-group">
           <label for="task-assignee">Assegnatario</label>
-          <select id="task-assignee" class="form-select">
-            <option value="AUTO">⚡ Auto-Assegna con Algoritmo Workload ($W_u$)</option>
-          </select>
+          <select id="task-assignee" class="form-select"></select>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
           <button type="button" class="btn btn-secondary" id="cancel-modal-task">Annulla</button>

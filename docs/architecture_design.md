@@ -9,7 +9,6 @@ The system is a cloud-native platform for collaborative task management, designe
 
 ### 1.1 Key Functional Requirements
 - **Collaborative Task Management**: Create, update, and track task states with support for concurrent edits.
-- **Automated Workload-Based Assignment**: Heuristic engine that automatically assigns tasks based on individual team workload scores.
 - **Real-Time Push Notifications**: Instant notification delivery via persistent WebSocket connections.
 - **Structured Data Export**: Asynchronous generation and streaming of JSON and CSV report files.
 
@@ -108,9 +107,6 @@ graph TB
 
 ### 3.3 Task Core Service (Task Core Service)
 - **Optimistic Locking**: Prevents concurrent updates by verifying the `version` column inside UPDATE statements. Returns `HTTP 409 Conflict` if client holds an obsolete version.
-- **Workload Scoring ($W_u$)**:
-  $$W_u = \sum_{t \in \text{Tasks}(u)} \left( \text{StoryPoints}(t) \times \text{StatusWeight}(\text{Status}(t)) \right)$$
-  using weights: In Progress (1.0), In Review (0.5), and To Do (0.25).
 - **Asynchronous Queue-Based Exports**: Export requests publish events to NATS JetStream topic (`export.jobs`), which are consumed by a pool of Go background workers. This isolates long-running jobs from the main API thread.
 
 ---

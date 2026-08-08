@@ -8,7 +8,7 @@
 |---|---|
 | **Simultaneous Concurrent Users** | **100 Virtual Users (VU)** |
 | **Test Duration** | 30 Seconds |
-| **HTTP/WSS Operations Mix** | 40% Status Update, 30% Task Creation, 30% Workload Auto-Assign |
+| **HTTP/WSS Operation Mix** | 50% Status Update, 50% Task Creation |
 | **Target Infrastructure** | Managed Kubernetes (3 ➔ 6 Go Pods via HPA) |
 | **SLA Uptime Target** | **≥ 99.5%** |
 | **Maximum Latency Target** | **< 100 ms** per HTTP request |
