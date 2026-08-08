@@ -169,3 +169,9 @@ All API responses append the recommended OWASP security headers:
 - **X-Content-Type-Options**: `nosniff`
 - **X-Frame-Options**: `DENY`
 - **Strict-Transport-Security (HSTS)**: Active for HTTPS connections.
+
+### 5.4 CSV Export Hardening & Formula Injection Prevention
+To secure data exports against malicious cell inputs and runtime parsing crashes, the export engine incorporates a dedicated sanitization parser:
+1. **Null/Undefined Safety**: Replaces empty values with a blank string (`""`) to prevent runtime script termination.
+2. **RFC 4180 Compliance**: Quotes all output cells and doubles internal quotes (e.g. `Task "New"` is escaped to `Task ""New""`).
+3. **Formula Injection (CSV Injection) Prevention**: Neutralizes trigger characters (`=`, `+`, `-`, `@`) by prepending a single quote (`'`), ensuring spreadsheet tools like Excel render the payload strictly as text. Unlike `escapeHTML()` (which only neutralizes browser-side XSS), this method secures the desktop spreadsheet parsing layer.
