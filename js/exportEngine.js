@@ -31,17 +31,16 @@ export function exportTasksAsCSV() {
   const users = Array.isArray(state.users) ? state.users : [];
   
   const rows = tasks.map(t => {
-    const assignee = users.find(u => u.id === t.assigneeId)?.name || 'Unassigned';
-    const safeTitle = (t.title || '').replace(/"/g, '""');
+    const assignee = users.find(u => u.id === t.assigneeId)?.name || null;
     return [
-      t.id || '',
-      `"${safeTitle}"`,
-      t.status || 'TODO',
-      t.priority || 'MEDIUM',
-      t.storyPoints || 1,
-      `"${assignee}"`,
-      t.version || 1,
-      t.updatedAt || new Date().toISOString()
+      sanitizeCSVField(t.id),
+      sanitizeCSVField(t.title),
+      sanitizeCSVField(t.status),
+      sanitizeCSVField(t.priority),
+      sanitizeCSVField(t.storyPoints),
+      sanitizeCSVField(assignee),
+      sanitizeCSVField(t.version),
+      sanitizeCSVField(t.updatedAt)
     ];
   });
 
@@ -52,6 +51,16 @@ export function exportTasksAsCSV() {
     taskCount: tasks.length,
     format: 'CSV'
   });
+}
+
+function sanitizeCSVField(val) {
+  if (val === null || val === undefined) return '""';
+  let str = String(val);
+  str = str.replace(/"/g, '""'); // Escaping dei doppi apici
+  if (['=', '+', '-', '@'].some(char => str.startsWith(char))) {
+    str = `'` + str; // Neutralizzazione formula injection
+  }
+  return `"${str}"`;
 }
 
 function downloadFile(content, fileName, contentType) {
