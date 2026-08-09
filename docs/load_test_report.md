@@ -7,7 +7,7 @@
 | Benchmark Parameter | Value Configured / Measured |
 |---|---|
 | **Simultaneous Concurrent Users** | **100 Virtual Users (VU)** |
-| **Test Duration** | 30 Seconds |
+| **Test Duration** | ~56 Seconds |
 | **HTTP/WSS Operation Mix** | 50% Status Update, 50% Task Creation |
 | **Target Infrastructure** | Managed Kubernetes (3 ➔ 6 Go Pods via HPA) |
 | **SLA Uptime Target** | **≥ 99.5%** |
@@ -21,29 +21,18 @@
  ┌───────────────────────────────────────────────────────────────────────────┐
  │                       STRESS TEST RESULTS (100 VU)                        │
  ├──────────────────────────────────────┬────────────────────────────────────┤
- │ Average Throughput                   │ 485.4 requests / second            │
- │ Total Requests Processed             │ 14,562 requests                    │
+ │ Average Throughput                   │ 54.0 requests / second             │
+ │ Total Requests Processed             │ 3,000 requests                     │
  │ Error Rate (HTTP 5xx)                │ 0.00%                              │
- │ Conflicts Handled (HTTP 409)         │ 1.2% (Resolved via Optimistic Lock)│
+ │ Conflicts Handled (HTTP 409)         │ 0.0% (Resolved via Optimistic Lock)│
  └──────────────────────────────────────┴────────────────────────────────────┘
 ```
 
 ### 2.1 Latency Distribution (Percentiles)
 
-```
-Latency (ms)
- 50 ms │                                                     █ (P99: 34.1ms)
- 40 ms │                                              █      █
- 30 ms │                                       █      █      █
- 20 ms │                        █ (P90: 18.2ms)█      █      █
- 10 ms │ █ (P50: 8.5ms)  █      █               █      █      █
-  0 ms └─┴──────────────┴──────┴───────────────┴──────┴──────┴───────
-         0%            25%     50%             75%    90%    99%
-```
-
-- **P50 (Median)**: **8.5 ms**
-- **P90**: **18.2 ms**
-- **P99 (Worst Case)**: **34.1 ms** (well below the 100 ms tolerance threshold).
+- **P50 (Median)**: **13.4 ms**
+- **P90**: **41.5 ms**
+- **P99 (Worst Case)**: **61.1 ms** (well below the 100 ms tolerance threshold).
 
 ---
 
