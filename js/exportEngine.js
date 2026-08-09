@@ -54,13 +54,23 @@ export function exportTasksAsCSV() {
 }
 
 function sanitizeCSVField(val) {
-  if (val === null || val === undefined) return '""';
-  let str = String(val);
-  str = str.replace(/"/g, '""'); // Escaping dei doppi apici
-  if (['=', '+', '-', '@'].some(char => str.startsWith(char))) {
-    str = `'` + str; // Neutralizzazione formula injection
+  // Se il valore è vuoto o nullo, restituisco una stringa vuota tra virgolette
+  if (val === null || val === undefined) {
+    return '""';
   }
-  return `"${str}"`;
+  
+  let str = String(val);
+  
+  // Raddoppio le virgolette per lo standard CSV (escaping)
+  str = str.replace(/"/g, '""');
+  
+  // Controllo di sicurezza: se la stringa inizia con un carattere speciale per le formule Excel
+  // (come =, +, -, @), ci metto davanti un apice singolo (') per evitare esecuzioni malevole
+  if (str.startsWith('=') || str.startsWith('+') || str.startsWith('-') || str.startsWith('@')) {
+    str = "'" + str;
+  }
+  
+  return '"' + str + '"';
 }
 
 function downloadFile(content, fileName, contentType) {
